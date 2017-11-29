@@ -58,7 +58,7 @@ RobartView.prototype = {
 		}
 		if (data.map && data.map.docking_pose) {
 			var pose = data.map.docking_pose;
-			this.feature_map.circle(50).fill({color: 'blue'});
+			this.feature_map.circle(50).move(pose.x, pose.y).fill({color: 'blue'});
 		}
 		this.setup_zoomer();
 	},
