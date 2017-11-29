@@ -7,6 +7,7 @@ RobartView.prototype = {
 		this.zoomer = null;
 		this.draw = SVG(this.div_id);
 		this.feature_map = this.draw.group();
+		this.areas = this.draw.group();
 	},
 
 	setup_zoomer: function() {
@@ -47,13 +48,36 @@ RobartView.prototype = {
 	load_feature_map: function(data) {
 		this.feature_map.clear();
 
-		var lines = data.map.lines;
+		var lines = (data && data.map && data.map.lines) ? data.map.lines : [];
 		for (var k = 0; k < lines.length; k++) {
 			var seg = lines[k];
 			this.feature_map.line(seg.x1, seg.y1, seg.x2, seg.y2).stroke({width: 3});
 		}
 		this.setup_zoomer();
 	},
+	load_areas: function(data) {
+		this.areas.clear();
+
+		var areas = (data && data.areas) ? data.areas : [];
+		for (var k = 0; k < areas.length; k++) {
+			var area = areas[k];
+			var segs = [];
+			var points = area.points || [];
+			for (var q = 0; q < points.length; q++) {
+				var pt = points[q];
+				segs.push(pt.x);
+				segs.push(pt.y);
+			}
+			var poly = this.areas.polygon(segs).fill({color: 'blue', opacity: 0.1}).stroke({width: 5});
+			poly.remember('area_id', area.id);
+			poly.click(function(evt) {
+				console.log('clicked area:', this.remember('area_id'));
+			});
+		}
+		this.setup_zoomer();
+	},
+
+
 	clicked: function(loc) {
 		console.log('clicked:', loc);
 	}
