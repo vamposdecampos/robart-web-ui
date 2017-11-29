@@ -6,6 +6,7 @@ RobartView.prototype = {
 	init: function() {
 		this.zoomer = null;
 		this.draw = SVG(this.div_id);
+		this.draw.flip('x');
 		this.feature_map = this.draw.group();
 		this.areas = this.draw.group();
 	},
