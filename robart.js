@@ -54,7 +54,7 @@ RobartView.prototype = {
 		var lines = (data && data.map && data.map.lines) ? data.map.lines : [];
 		for (var k = 0; k < lines.length; k++) {
 			var seg = lines[k];
-			this.feature_map.line(seg.x1, seg.y1, seg.x2, seg.y2).stroke({width: 3});
+			this.feature_map.line(seg.x1, seg.y1, seg.x2, seg.y2).stroke({width: 5});
 		}
 		if (data.map && data.map.docking_pose) {
 			var pose = data.map.docking_pose;
@@ -83,7 +83,22 @@ RobartView.prototype = {
 		}
 		this.setup_zoomer();
 	},
-
+	load_polygons: function(data) {
+		this.polygons.clear();
+		for (var k = 0; k < data.map.polygons.length; k++) {
+			var polygon = data.map.polygons[k];
+			var segs = [];
+			for (var q = 0; q < polygon.segments.length; q++) {
+				var seg = polygon.segments[q];
+				segs.push(seg.x1);
+				segs.push(seg.y1);
+				// there is an .x2 and .y2, but they just repeat
+				// .x1 and .y1 of the next segment
+			}
+			this.polygons.polygon(segs).stroke({width: 5, color: 'red'}).fill('none');
+		}
+		this.setup_zoomer();
+	},
 
 	clicked: function(loc) {
 		console.log('clicked:', loc);
