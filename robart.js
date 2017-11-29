@@ -54,6 +54,10 @@ RobartView.prototype = {
 			var seg = lines[k];
 			this.feature_map.line(seg.x1, seg.y1, seg.x2, seg.y2).stroke({width: 3});
 		}
+		if (data.map && data.map.docking_pose) {
+			var pose = data.map.docking_pose;
+			this.feature_map.circle(50).fill({color: 'blue'});
+		}
 		this.setup_zoomer();
 	},
 	load_areas: function(data) {
