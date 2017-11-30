@@ -10,6 +10,12 @@ RobartView.prototype = {
 			y: 0,
 			area_id: 0
 		};
+		this.data_sources = [
+			{ name: "feature_map" },
+			{ name: "areas" },
+			{ name: "n_n_polygons" },
+			{ name: "cleaning_grid_map", mapless: true }
+		];
 
 		this.draw = SVG(this.div_id);
 		var root = this.draw.group();
@@ -101,7 +107,7 @@ RobartView.prototype = {
 		});
 	},
 
-	load_feature_map: function(data) {
+	parse_feature_map: function(data) {
 		this.feature_map.clear();
 
 		var lines = (data && data.map && data.map.lines) ? data.map.lines : [];
@@ -115,7 +121,7 @@ RobartView.prototype = {
 		}
 		this.setup_zoomer();
 	},
-	load_areas: function(data) {
+	parse_areas: function(data) {
 		this.areas.clear();
 
 		var areas = (data && data.areas) ? data.areas : [];
@@ -137,7 +143,7 @@ RobartView.prototype = {
 		}
 		this.setup_zoomer();
 	},
-	load_polygons: function(data) {
+	parse_n_n_polygons: function(data) {
 		this.polygons.clear();
 		for (var k = 0; k < data.map.polygons.length; k++) {
 			var polygon = data.map.polygons[k];
@@ -153,7 +159,12 @@ RobartView.prototype = {
 		}
 		this.setup_zoomer();
 	},
-	load_cleaning_grid_map: function(data) {
+	parse_cleaning_grid_map: function(data) {
+		if (!this.selection.map_id) {
+			/* if this is the first thing we fetched, use the map_id to fetch the rest */
+			this.selection.map_id = data.map_id;
+			this.fetch_all_data();
+		}
 		this.cleaning_grid.clear();
 		var cleaned = this.decode_rle(data.cleaned);
 		var res = data.resolution;
@@ -188,6 +199,10 @@ RobartView.prototype = {
 		var text = 'x=' + this.selection.x +
 			' y=' + this.selection.y +
 			' area_id=' + this.selection.area_id;
+		$.each(this.data_sources, function(idx, ds) {
+			if (ds.loading)
+				text += ' ' + ds.name + '...';
+		});
 		$("#status").text(text);
 	},
 
@@ -221,15 +236,32 @@ RobartView.prototype = {
 			me.load_polygons(data);
 		});
 	},
-	do_load: function() {
+	fetch_all_data: function() {
 		var me = this;
+		$.each(this.data_sources, function(idx, ds) {
+			if (ds.loaded)
+				return;
+			if (!(ds.mapless || me.selection.map_id))
+				return;
+			var path = 'get/' + ds.name;
+			if (!ds.mapless)
+				path += '?map_id=' + me.selection.map_id;
+			console.log('fetch:', path);
+			ds.loading = true;
+			$.getJSON(path, function(data) {
+				ds.loading = false;
+				ds.loaded = true;
+				me['parse_' + ds.name](data);
+				me.update_status();
+			});
+		});
+		this.update_status();
+	},
+	do_load: function() {
 		$.getJSON('get/robot_name', function(data) {
 			document.title = data.name;
 		});
-		$.getJSON('get/cleaning_grid_map', function(data) {
-			me.load_cleaning_grid_map(data);
-			me.fetch_map(data.map_id);
-		});
+		this.fetch_all_data();
 	}
 };
 
