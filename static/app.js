@@ -236,10 +236,10 @@ RobartView.prototype = {
 			me.load_polygons(data);
 		});
 	},
-	fetch_all_data: function() {
+	fetch_all_data: function(refresh) {
 		var me = this;
 		$.each(this.data_sources, function(idx, ds) {
-			if (ds.loaded)
+			if (ds.loaded && !refresh)
 				return;
 			if (!(ds.mapless || me.selection.map_id))
 				return;
@@ -277,5 +277,5 @@ RobartView.prototype = {
 };
 
 rv = new RobartView('drawing')
-$('#btn_load').click(function() { rv.do_load(); });
+$('#btn_load').click(function() { rv.fetch_all_data(true); });
 rv.do_load();
