@@ -18,6 +18,8 @@ RobartView.prototype = {
 		this.polygons = root.group();
 		this.cleaning_grid = root.group();
 		this.areas = root.group();
+		this.markers = root.group();
+		this.markers.flip('x'); // weird. the others don't need that.
 	},
 
 	setup_zoomer: function() {
@@ -198,6 +200,10 @@ RobartView.prototype = {
 		console.log('clicked:', loc);
 		this.selection.x = Math.round(loc.x);
 		this.selection.y = Math.round(loc.y);
+		this.markers.clear();
+		this.markers.polygon('50,0 60,40 100,50 60,60 50,100 40,60 0,50 40,40')
+			.fill({color: 'blue'})
+			.move(this.selection.x - 50, this.selection.y - 50);
 		this.update_status();
 	}
 };
