@@ -243,16 +243,27 @@ RobartView.prototype = {
 				return;
 			if (!(ds.mapless || me.selection.map_id))
 				return;
+			if (ds.loading)
+				return;
 			var path = 'get/' + ds.name;
-			if (!ds.mapless)
-				path += '?map_id=' + me.selection.map_id;
 			console.log('fetch:', path);
 			ds.loading = true;
-			$.getJSON(path, function(data) {
-				ds.loading = false;
-				ds.loaded = true;
-				me['parse_' + ds.name](data);
-				me.update_status();
+			$.ajax({
+				dataType: "json",
+				url: path,
+				data: ds.mapless ? null : ('map_id=' + me.selection.map_id),
+				success: function(data) {
+					ds.loading = false;
+					ds.loaded = true;
+					// TODO: handle data.error_{code,tag,message}
+					me['parse_' + ds.name](data);
+					me.update_status();
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					// TODO: show error in UI?
+					ds.loading = false;
+					console.log('fetch error:', xhr.status, thrownError);
+				}
 			});
 		});
 		this.update_status();
