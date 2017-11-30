@@ -5,6 +5,12 @@ function RobartView(div_id) {
 RobartView.prototype = {
 	init: function() {
 		this.zoomer = null;
+		this.selection = {
+			x: 0,
+			y: 0,
+			area_id: 0
+		};
+
 		this.draw = SVG(this.div_id);
 		var root = this.draw.group();
 		root.flip('x');
@@ -78,8 +84,9 @@ RobartView.prototype = {
 			}
 			var poly = this.areas.polygon(segs).fill({color: 'blue', opacity: 0.1}).stroke({width: 5});
 			poly.remember('area_id', area.id);
+			var me = this;
 			poly.click(function(evt) {
-				console.log('clicked area:', this.remember('area_id'));
+				me.area_clicked(this.remember('area_id'));
 			});
 		}
 		this.setup_zoomer();
@@ -131,8 +138,23 @@ RobartView.prototype = {
 		return res;
 	},
 
+	update_status: function() {
+		var text = 'x=' + this.selection.x +
+			' y=' + this.selection.y +
+			' area_id=' + this.selection.area_id;
+		$("#status").text(text);
+	},
+
+	area_clicked: function(area_id) {
+		console.log('area clicked:', area_id);
+		this.selection.area_id = area_id;
+		this.update_status();
+	},
 	clicked: function(loc) {
 		console.log('clicked:', loc);
+		this.selection.x = Math.round(loc.x);
+		this.selection.y = Math.round(loc.y);
+		this.update_status();
 	}
 };
 
