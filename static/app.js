@@ -205,7 +205,15 @@ RobartView.prototype = {
 			.fill({color: 'blue'})
 			.move(this.selection.x - 50, this.selection.y - 50);
 		this.update_status();
+	},
+
+
+	do_load: function() {
+		var me = this;
+		$.getJSON('get/cleaning_grid_map', function(data) { me.load_cleaning_grid_map(data); });
 	}
 };
 
 rv = new RobartView('drawing')
+$('#btn_load').click(function() { rv.do_load(); });
+rv.do_load();
