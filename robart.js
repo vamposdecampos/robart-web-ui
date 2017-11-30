@@ -10,6 +10,7 @@ RobartView.prototype = {
 		root.flip('x');
 		this.feature_map = root.group();
 		this.polygons = root.group();
+		this.cleaning_grid = root.group();
 		this.areas = root.group();
 	},
 
@@ -98,6 +99,36 @@ RobartView.prototype = {
 			this.polygons.polygon(segs).stroke({width: 5, color: 'red'}).fill('none');
 		}
 		this.setup_zoomer();
+	},
+	load_cleaning_grid_map: function(data) {
+		this.cleaning_grid.clear();
+		var cleaned = this.decode_rle(data.cleaned);
+		var res = data.resolution;
+		var ox = data.lower_left_x;
+		var oy = data.lower_left_y;
+		var idx = 0;
+		for (var y = 0; y < data.size_y; y++) {
+			for (var x = 0; x < data.size_x; x++, idx++) {
+				if (!cleaned[idx])
+					continue;
+				this.cleaning_grid.rect(res, res)
+					.stroke({color: 'white', width: 1})
+					.fill({color: 'green', opacity: 0.4})
+					.move(ox + x * res, oy + y * res);
+			}
+		}
+		this.setup_zoomer();
+	},
+
+	decode_rle: function(items) {
+		var res = [];
+		var last = items[0];
+		for (var k = 1; k < items.length; k++) {
+			var cnt = items[k];
+			last = last ? 0 : 1;
+			res.push.apply(res, Array(cnt).fill(last));
+		}
+		return res;
 	},
 
 	clicked: function(loc) {
