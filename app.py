@@ -24,4 +24,4 @@ def root():
 	return redirect('/app.html', code=301)
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	app.run(host='', debug=True)
