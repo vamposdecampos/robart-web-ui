@@ -208,9 +208,28 @@ RobartView.prototype = {
 	},
 
 
+	fetch_map: function(map_id) {
+		this.selection.map_id = map_id;
+		var me = this;
+		$.getJSON('get/feature_map?map_id=' + this.selection.map_id, function(data) {
+			me.load_feature_map(data);
+		});
+		$.getJSON('get/areas?map_id=' + this.selection.map_id, function(data) {
+			me.load_areas(data);
+		});
+		$.getJSON('get/n_n_polygons?map_id=' + this.selection.map_id, function(data) {
+			me.load_polygons(data);
+		});
+	},
 	do_load: function() {
 		var me = this;
-		$.getJSON('get/cleaning_grid_map', function(data) { me.load_cleaning_grid_map(data); });
+		$.getJSON('get/robot_name', function(data) {
+			document.title = data.name;
+		});
+		$.getJSON('get/cleaning_grid_map', function(data) {
+			me.load_cleaning_grid_map(data);
+			me.fetch_map(data.map_id);
+		});
 	}
 };
 
